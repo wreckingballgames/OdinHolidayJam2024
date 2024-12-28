@@ -10,6 +10,11 @@ WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
 WINDOW_TITLE :: "Wonderlust"
 
+Wrap_State :: enum {
+    Measure_State,
+    Draw_State,
+}
+
 TEXT_SIZE :: 20
 
 IMAGE_X :: 140
@@ -19,14 +24,14 @@ BANNER_Y :: 0
 LEFT_BANNER_X :: 0
 RIGHT_BANNER_X :: 1140
 
-TEXT_AREA_COLOR :: rl.Color {201, 204, 161, 255}
+TEXT_AREA_COLOR :: rl.Color {84, 51, 68, 255}
 
-TEXT_BOX_BACKGROUND_COLOR :: rl.Color {202, 160, 90, 255}
-TEXT_BOX_TEXT_COLOR :: rl.Color {142, 160, 145, 255}
+TEXT_BOX_BACKGROUND_COLOR :: rl.Color {81, 82, 98, 255}
+TEXT_BOX_TEXT_COLOR :: rl.Color {202, 160, 90, 255}
 
-CHOICE_BOX_COLOR :: rl.Color {202, 160, 90, 255}
+CHOICE_BOX_COLOR :: rl.Color {174, 106, 71, 128}
 
-CHOICE_BACKGROUND_COLOR :: rl.Color {174, 106, 71, 128}
+CHOICE_BACKGROUND_COLOR :: rl.Color {81, 82, 98, 255}
 CHOICE_TEXT_COLOR :: rl.Color {202, 160, 90, 255}
 CHOICE_RECT_X :: 45
 CHOICE_RECT_Y :: 590
@@ -51,6 +56,7 @@ screens: map[cstring]screen
 self_doubt: int
 
 main :: proc() {
+    // Tracking allocator code adapted from Karl Zylinski's tutorials.
     track: mem.Tracking_Allocator
     mem.tracking_allocator_init(&track, context.allocator)
     context.allocator = mem.tracking_allocator(&track)
@@ -271,7 +277,7 @@ main :: proc() {
 
     }
 
-    current_screen := screens["example_screen"]
+    current_screen := screens["intro"]
 
     for !rl.WindowShouldClose() {
         rl.BeginDrawing()
@@ -286,18 +292,21 @@ main :: proc() {
         rl.DrawTexture(right_banner_image, RIGHT_BANNER_X, BANNER_Y, rl.WHITE)
 
         rl.DrawRectangleRec(text_area_rect, TEXT_AREA_COLOR)
-        rl.DrawRectangleRounded(text_box_rect, .45, 32, TEXT_BOX_BACKGROUND_COLOR)
+        rl.DrawRectangleRec(text_box_rect, TEXT_BOX_BACKGROUND_COLOR)
 
-        rl.DrawRectangleRounded(choice_box_rect, .45, 32, CHOICE_BOX_COLOR)
+        draw_text_boxed(font, current_screen.text, text_box_rect, TEXT_SIZE, 0, TEXT_BOX_TEXT_COLOR)
 
-        rl.DrawRectangleRounded(choice_rect1, .45, 32, CHOICE_BACKGROUND_COLOR)
-        rl.DrawRectangleRounded(choice_rect2, .45, 32, CHOICE_BACKGROUND_COLOR)
-        rl.DrawRectangleRounded(choice_rect3, .45, 32, CHOICE_BACKGROUND_COLOR)
-        // TODO: Draw choice text
+        rl.DrawRectangleRec(choice_box_rect, CHOICE_BOX_COLOR)
 
-        rl.DrawTextEx(font, current_screen.text, {0, 0}, TEXT_SIZE, 0, TEXT_BOX_TEXT_COLOR)
-        for choice, index in current_screen.choices {
-            rl.DrawTextEx(font, choice.text, {0, f32(TEXT_SIZE * index + TEXT_SIZE)}, 20, 0, CHOICE_TEXT_COLOR)
+        rl.DrawRectangleRec(choice_rect1, CHOICE_BACKGROUND_COLOR)
+        draw_text_boxed(font, current_screen.choices[0].text, choice_rect1, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+        if len(current_screen.choices) >= 2 {
+            rl.DrawRectangleRec(choice_rect2, CHOICE_BACKGROUND_COLOR)
+            draw_text_boxed(font, current_screen.choices[1].text, choice_rect2, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+        }
+        if len(current_screen.choices) == 3 {
+            rl.DrawRectangleRec(choice_rect3, CHOICE_BACKGROUND_COLOR)
+            draw_text_boxed(font, current_screen.choices[2].text, choice_rect3, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
         }
     }
 }
@@ -375,4 +384,128 @@ generate_crossroads_loop :: proc() {
 // TODO
 generate_owl_loop :: proc() {
 
+}
+
+// Adapted from an example by Vlad Adrian and Ramon Santamaria
+draw_text_boxed :: proc(font: rl.Font, text: cstring, rect: rl.Rectangle, font_size: f32, spacing: f32, tint: rl.Color) {
+    draw_text_boxed_selectable(font, text, rect, font_size, spacing, tint, 0, 0, rl.WHITE, rl.WHITE)
+}
+
+draw_text_boxed_selectable :: proc(font: rl.Font, text: cstring, rect: rl.Rectangle, font_size: f32, spacing: f32, tint: rl.Color, select_start: int, select_length: int, select_tint: rl.Color, select_back_tint: rl.Color) {
+    select_start := select_start
+
+    text_as_bytes := transmute([^]u8)text
+
+    length := rl.TextLength(text)
+
+    text_offset_x: f32
+    text_offset_y: f32
+
+    scale_factor := font_size / f32(font.baseSize)
+
+    // Word/character wrapping mechanism variable
+    state := Wrap_State.Draw_State
+
+    start_line := -1
+    end_line := -1
+    last_k := -1
+
+    for i, k in 0..<length {
+        i := i
+        k := k
+        // Get next codepoint from byte string and glyph index in font
+        codepoint_byte_count: i32
+        codepoint := rl.GetCodepoint(cstring(&text_as_bytes[i]), &codepoint_byte_count)
+        index := rl.GetGlyphIndex(font, codepoint)
+
+        // NOTE: Normally we exit the decoding sequence as soon as a bad byte is found (and return 0x3f)
+        // but we need to draw all of the bad bytes using the '?' symbol moving one byte
+        if codepoint == 0x3f {
+            codepoint_byte_count = 1
+        }
+        i += u32(codepoint_byte_count - 1)
+
+        glyph_width: f32
+        if codepoint != '\n' {
+            glyph_width = (font.glyphs[index].advanceX == 0) ? font.recs[index].width * scale_factor : f32(font.glyphs[index].advanceX) * scale_factor
+
+            if i + 1 < length {
+                glyph_width = glyph_width + spacing
+            }
+        }
+
+        if state == .Measure_State {
+            if codepoint == ' ' || codepoint == '\t' || codepoint == '\n' {
+                end_line = int(i)
+            }
+
+            if text_offset_x + glyph_width > rect.width {
+                end_line = end_line < 1 ? int(i) : end_line
+                if i == u32(end_line) {
+                    end_line -= int(codepoint_byte_count)
+                }
+                if start_line + int(codepoint_byte_count) == end_line {
+                    end_line = int(i) - int(codepoint_byte_count)
+                }
+
+                state = toggle_wrap_state(state)
+            } else if i + 1 == length {
+                end_line = int(i)
+                state = toggle_wrap_state(state)
+            } else if codepoint == '\n' {
+                state = toggle_wrap_state(state)
+            }
+
+            if state == .Draw_State {
+                text_offset_x = 0
+                i = u32(start_line)
+                glyph_width = 0
+
+                // Save character position when we switch states
+                tmp := last_k
+                last_k = k - 1
+                k = tmp
+            }
+        } else {
+            if codepoint == '\n' {
+                text_offset_y += f32(font.baseSize + font.baseSize / 2) * scale_factor
+                text_offset_x = 0
+            } else {
+                if text_offset_x + glyph_width > rect.width {
+                    text_offset_y += f32(font.baseSize + font.baseSize / 2) * scale_factor
+                    text_offset_x = 0
+                }
+
+                // When text overflows rectangle height limit, just stop drawing
+                if text_offset_y + f32(font.baseSize) * scale_factor > rect.height {
+                    break
+                }
+
+                // Draw selection background
+                is_glyph_selected: bool
+                if select_start >= 0 && k >= select_start && k < select_start + select_length {
+                    rl.DrawRectangleRec({rect.x + text_offset_x - 1, rect.y + text_offset_y, glyph_width, f32(font.baseSize) * scale_factor}, select_back_tint)
+                    is_glyph_selected = true
+                }
+
+                // Draw current character glyph
+                if codepoint != ' ' && codepoint != '\t' {
+                    rl.DrawTextCodepoint(font, codepoint, {rect.x + text_offset_x, rect.y + text_offset_y}, font_size, is_glyph_selected ? select_tint : tint)
+                }
+            }
+        }
+
+        // Avoid leading spaces
+        if text_offset_x != 0 || codepoint != ' ' {
+            text_offset_x += glyph_width
+        }
+    }
+}
+
+toggle_wrap_state :: proc(state: Wrap_State) -> Wrap_State {
+    if state == .Draw_State {
+        return .Measure_State
+    } else {
+        return .Draw_State
+    }
 }
