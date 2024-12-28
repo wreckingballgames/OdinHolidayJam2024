@@ -5,7 +5,7 @@ import rl "vendor:raylib"
 TARGET_FPS :: 60
 WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
-WINDOW_TITLE :: "Odin Holiday Jam 2024 Submission"
+WINDOW_TITLE :: "Wonderlust"
 
 main :: proc() {
     rl.SetConfigFlags({.VSYNC_HINT})
