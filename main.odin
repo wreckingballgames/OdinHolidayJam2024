@@ -16,15 +16,15 @@ BANNER_Y :: 0
 LEFT_BANNER_X :: 0
 RIGHT_BANNER_X :: 1140
 
-TEXT_AREA_COLOR :: rl.Color {255, 0, 0, 255}
+TEXT_AREA_COLOR :: rl.Color {201, 204, 161, 255}
 
-TEXT_BOX_BACKGROUND_COLOR :: rl.Color {0, 0, 255, 255}
-TEXT_BOX_TEXT_COLOR :: rl.Color {255, 255, 255, 255}
+TEXT_BOX_BACKGROUND_COLOR :: rl.Color {202, 160, 90, 255}
+TEXT_BOX_TEXT_COLOR :: rl.Color {142, 160, 145, 255}
 
-CHOICE_BOX_COLOR :: rl.Color {255, 255, 255, 255}
+CHOICE_BOX_COLOR :: rl.Color {202, 160, 90, 255}
 
-CHOICE_BACKGROUND_COLOR :: rl.Color {0, 255, 0, 255}
-CHOICE_TEXT_COLOR :: rl.Color {255, 255, 255, 255}
+CHOICE_BACKGROUND_COLOR :: rl.Color {174, 106, 71, 128}
+CHOICE_TEXT_COLOR :: rl.Color {202, 160, 90, 255}
 CHOICE_RECT_X :: 45
 CHOICE_RECT_Y :: 590
 CHOICE_RECT_Y_OFFSET :: 40
@@ -134,13 +134,13 @@ main :: proc() {
         rl.DrawTexture(right_banner, RIGHT_BANNER_X, BANNER_Y, rl.WHITE)
 
         rl.DrawRectangleRec(text_area_rect, TEXT_AREA_COLOR)
-        rl.DrawRectangleRec(text_box_rect, TEXT_BOX_BACKGROUND_COLOR)
+        rl.DrawRectangleRounded(text_box_rect, .45, 32, TEXT_BOX_BACKGROUND_COLOR)
 
-        rl.DrawRectangleRec(choice_box_rect, CHOICE_BOX_COLOR)
+        rl.DrawRectangleRounded(choice_box_rect, .45, 32, CHOICE_BOX_COLOR)
 
-        rl.DrawRectangleRec(choice_rect1, CHOICE_BACKGROUND_COLOR)
-        rl.DrawRectangleRec(choice_rect2, CHOICE_BACKGROUND_COLOR)
-        rl.DrawRectangleRec(choice_rect3, CHOICE_BACKGROUND_COLOR)
+        rl.DrawRectangleRounded(choice_rect1, .45, 32, CHOICE_BACKGROUND_COLOR)
+        rl.DrawRectangleRounded(choice_rect2, .45, 32, CHOICE_BACKGROUND_COLOR)
+        rl.DrawRectangleRounded(choice_rect3, .45, 32, CHOICE_BACKGROUND_COLOR)
         // TODO: Draw choice text
 
         rl.DrawText(current_screen.text, 0, 0, 10, rl.WHITE)
