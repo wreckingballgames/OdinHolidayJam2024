@@ -9,6 +9,28 @@ WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
 WINDOW_TITLE :: "Wonderlust"
 
+IMAGE_X :: 140
+IMAGE_Y :: 0
+
+BANNER_Y :: 0
+LEFT_BANNER_X :: 0
+RIGHT_BANNER_X :: 1140
+
+TEXT_AREA_COLOR :: rl.Color {255, 0, 0, 255}
+
+TEXT_BOX_BACKGROUND_COLOR :: rl.Color {0, 0, 255, 255}
+TEXT_BOX_TEXT_COLOR :: rl.Color {255, 255, 255, 255}
+
+CHOICE_BOX_COLOR :: rl.Color {255, 255, 255, 255}
+
+CHOICE_BACKGROUND_COLOR :: rl.Color {0, 255, 0, 255}
+CHOICE_TEXT_COLOR :: rl.Color {255, 255, 255, 255}
+CHOICE_RECT_X :: 45
+CHOICE_RECT_Y :: 590
+CHOICE_RECT_Y_OFFSET :: 40
+CHOICE_RECT_WIDTH :: 1190
+CHOICE_RECT_HEIGHT :: 38
+
 choice :: struct {
     text: cstring,
     screen_id: cstring,
@@ -42,6 +64,38 @@ main :: proc() {
     rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     defer rl.CloseWindow()
 
+    // TODO: Replace placeholder (loaded on a screen by screen basis)
+    current_image := rl.LoadTexture("image_placeholder.png")
+
+    // TODO: Replace placeholders
+    left_banner := rl.LoadTexture("banner_placeholder.png")
+    right_banner := rl.LoadTexture("banner_placeholder.png")
+
+    text_area_rect := rl.Rectangle {0, 420, 1280, 300,}
+    text_box_rect := rl.Rectangle {32, 430, 1216, 150,}
+    choice_box_rect := rl.Rectangle {32, 585, 1216, 130,}
+
+    choice_rect1 := rl.Rectangle {
+        CHOICE_RECT_X,
+        CHOICE_RECT_Y + 0,
+        CHOICE_RECT_WIDTH,
+        CHOICE_RECT_HEIGHT,
+    }
+
+    choice_rect2 := rl.Rectangle {
+        CHOICE_RECT_X,
+        CHOICE_RECT_Y + (CHOICE_RECT_Y_OFFSET * 1),
+        CHOICE_RECT_WIDTH,
+        CHOICE_RECT_HEIGHT,
+    }
+
+    choice_rect3 := rl.Rectangle {
+        CHOICE_RECT_X,
+        CHOICE_RECT_Y + (CHOICE_RECT_Y_OFFSET * 2),
+        CHOICE_RECT_WIDTH,
+        CHOICE_RECT_HEIGHT,
+    }
+
     example_choice := choice {
         "Example choice 1",
         "example_screen",
@@ -73,14 +127,28 @@ main :: proc() {
         rl.BeginDrawing()
         defer rl.EndDrawing()
 
+        rl.ClearBackground(rl.GRAY)
+
+        rl.DrawTexture(current_image, IMAGE_X, IMAGE_Y, rl.WHITE)
+        rl.DrawTexture(left_banner, LEFT_BANNER_X, BANNER_Y, rl.WHITE)
+        rl.DrawTexture(right_banner, RIGHT_BANNER_X, BANNER_Y, rl.WHITE)
+
+        rl.DrawRectangleRec(text_area_rect, TEXT_AREA_COLOR)
+        rl.DrawRectangleRec(text_box_rect, TEXT_BOX_BACKGROUND_COLOR)
+
+        rl.DrawRectangleRec(choice_box_rect, CHOICE_BOX_COLOR)
+
+        rl.DrawRectangleRec(choice_rect1, CHOICE_BACKGROUND_COLOR)
+        rl.DrawRectangleRec(choice_rect2, CHOICE_BACKGROUND_COLOR)
+        rl.DrawRectangleRec(choice_rect3, CHOICE_BACKGROUND_COLOR)
+        // TODO: Draw choice text
+
         rl.DrawText(current_screen.text, 0, 0, 10, rl.WHITE)
         for choice, index in current_screen.choices {
             rl.DrawText(choice.text, 0, 10 * i32(index) + 10, 10, rl.WHITE)
         }
 
         current_screen.choices[0].side_effects["example_side_effect"]()
-
-        rl.ClearBackground(rl.GRAY)
     }
 }
 
