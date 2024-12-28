@@ -33,6 +33,8 @@ CHOICE_BOX_COLOR :: rl.Color {174, 106, 71, 128}
 
 CHOICE_BACKGROUND_COLOR :: rl.Color {81, 82, 98, 255}
 CHOICE_TEXT_COLOR :: rl.Color {202, 160, 90, 255}
+SELECTED_CHOICE_BACKGROUND_COLOR :: rl.Color {202, 160, 90, 255}
+SELECTED_CHOICE_TEXT_COLOR :: rl.Color {81, 82, 98, 255}
 CHOICE_RECT_X :: 45
 CHOICE_RECT_Y :: 590
 CHOICE_RECT_Y_OFFSET :: 40
@@ -279,7 +281,33 @@ main :: proc() {
 
     current_screen := screens["intro"]
 
+    mouse_position: rl.Vector2
+
     for !rl.WindowShouldClose() {
+        mouse_position = rl.GetMousePosition()
+
+        choice1_selected: bool
+        choice2_selected: bool
+        choice3_selected: bool
+
+        if rl.CheckCollisionPointRec(mouse_position, choice_rect1) {
+            choice1_selected = true
+        } else if rl.CheckCollisionPointRec(mouse_position, choice_rect2) {
+            choice2_selected = true
+        } else if rl.CheckCollisionPointRec(mouse_position, choice_rect3) {
+            choice3_selected = true
+        }
+
+        if rl.IsMouseButtonReleased(.LEFT) {
+            if choice1_selected {
+                current_screen = screens[current_screen.choices[0].screen_id]
+            } else if choice2_selected && len(current_screen.choices) >= 2 {
+                current_screen = screens[current_screen.choices[1].screen_id]
+            } else if choice3_selected && len(current_screen.choices) == 3 {
+                current_screen = screens[current_screen.choices[2].screen_id]
+            }
+        }
+
         rl.BeginDrawing()
         defer rl.EndDrawing()
 
@@ -298,15 +326,30 @@ main :: proc() {
 
         rl.DrawRectangleRec(choice_box_rect, CHOICE_BOX_COLOR)
 
-        rl.DrawRectangleRec(choice_rect1, CHOICE_BACKGROUND_COLOR)
-        draw_text_boxed(font, current_screen.choices[0].text, choice_rect1, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+        if choice1_selected {
+            rl.DrawRectangleRec(choice_rect1, SELECTED_CHOICE_BACKGROUND_COLOR)
+            draw_text_boxed(font, current_screen.choices[0].text, choice_rect1, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
+        } else {
+            rl.DrawRectangleRec(choice_rect1, CHOICE_BACKGROUND_COLOR)
+            draw_text_boxed(font, current_screen.choices[0].text, choice_rect1, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+        }
         if len(current_screen.choices) >= 2 {
-            rl.DrawRectangleRec(choice_rect2, CHOICE_BACKGROUND_COLOR)
-            draw_text_boxed(font, current_screen.choices[1].text, choice_rect2, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+            if choice2_selected {
+                rl.DrawRectangleRec(choice_rect2, SELECTED_CHOICE_BACKGROUND_COLOR)
+                draw_text_boxed(font, current_screen.choices[1].text, choice_rect2, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
+            } else {
+                rl.DrawRectangleRec(choice_rect2, CHOICE_BACKGROUND_COLOR)
+                draw_text_boxed(font, current_screen.choices[1].text, choice_rect2, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+            }
         }
         if len(current_screen.choices) == 3 {
-            rl.DrawRectangleRec(choice_rect3, CHOICE_BACKGROUND_COLOR)
-            draw_text_boxed(font, current_screen.choices[2].text, choice_rect3, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+            if choice3_selected {
+                rl.DrawRectangleRec(choice_rect3, SELECTED_CHOICE_BACKGROUND_COLOR)
+                draw_text_boxed(font, current_screen.choices[2].text, choice_rect3, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
+            } else {
+                rl.DrawRectangleRec(choice_rect3, CHOICE_BACKGROUND_COLOR)
+                draw_text_boxed(font, current_screen.choices[2].text, choice_rect3, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+            }
         }
     }
 }
