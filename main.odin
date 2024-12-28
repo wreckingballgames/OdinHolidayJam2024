@@ -2,6 +2,7 @@ package main
 
 import "core:fmt"
 import "core:mem"
+import "core:math/rand"
 import rl "vendor:raylib"
 
 TARGET_FPS :: 60
@@ -36,7 +37,7 @@ CHOICE_RECT_HEIGHT :: 38
 choice :: struct {
     text: cstring,
     screen_id: cstring,
-    side_effects: map[cstring]proc(),
+    side_effects: []proc(),
 }
 
 screen :: struct {
@@ -44,6 +45,10 @@ screen :: struct {
     text: cstring,
     choices: []choice,
 }
+
+screens: map[cstring]screen
+
+self_doubt: int
 
 main :: proc() {
     track: mem.Tracking_Allocator
@@ -74,6 +79,7 @@ main :: proc() {
     cave_entrance_image := rl.LoadTexture("images/cave_entrance.png")
     cave_exit_image := rl.LoadTexture("images/cave_exit.png")
     crystals_image := rl.LoadTexture("images/crystals.png")
+    crossroads_image := rl.LoadTexture("images/crossroads.png")
     high_path_image := rl.LoadTexture("images/high_path.png")
     low_path_image := rl.LoadTexture("images/low_path.png")
     owl_image := rl.LoadTexture("images/owl.png")
@@ -106,31 +112,164 @@ main :: proc() {
         CHOICE_RECT_HEIGHT,
     }
 
-    example_choice := choice {
-        "Example choice 1",
-        "example_screen",
-        map[cstring]proc() {"example_side_effect" = example_side_effect},
-    }
-    defer delete(example_choice.side_effects)
-
-    example_choice2 := choice {
-        "Example choice 2",
-        "example_screen",
-        map[cstring]proc() {"example_side_effect" = example_side_effect},
-    }
-    defer delete(example_choice2.side_effects)
-
-    example_screen := screen {
-        image = cave_entrance_image,
-        text = "Example screen",
-        choices = []choice {example_choice, example_choice2}
-    }
-
     // TODO: Build a map of screens programmatically using input XML data. Their choices are also built with this data.
     //   Ensure there is a good way to insert or overwrite screens for the sake of certain screens that loop with variations.
-    screens := make(map[cstring]screen)
+    screens = make(map[cstring]screen)
     defer delete(screens)
-    screens[example_choice.screen_id] = example_screen
+
+    screens["intro"] = {
+        image = cave_entrance_image,
+        text = "There stood a young man before the narrow mouth of a cave sticking out of the ground at a low level like an unsightly pimple. He had sandy hair and looked about 15 (maybe he was.) He was covered in bruises, some fresh and some a sickly yellow-and-purple, and he was dressed like a soldier in some antiquated war (maybe he was.) He had beat the road for a solid fortnight before entering a forest. It was unkind to him, so he followed an old path out and found himself here. His feet were sore and he had to make a decision.",
+        choices = {
+            {
+                text = "Plunge in.",
+                screen_id = "crystals",
+            },
+            {
+                text = "Think about whether going into the cave is a good idea.",
+                screen_id = "crystals",
+            },
+            {
+                text = "Turn back.",
+                screen_id = "early_ending",
+            },
+        },
+    }
+    screens["crystals"] = {
+        image = crystals_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "Listen closely.",
+                screen_id = "crystals_loop",
+                side_effects = {generate_crystals_loop},
+            },
+            {
+                text = "\"Hello?\"",
+                screen_id = "crystals_silence",
+            },
+            {
+                text = "Ignore it and keep moving.",
+                screen_id = "crossroads",
+                side_effects = {decrement_self_doubt},
+            },
+        },
+    }
+    screens["crystals_loop"] = {
+        image = crystals_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "\"Hello?\"",
+                screen_id = "crystals_loop",
+                side_effects = {generate_crystals_loop, increment_self_doubt},
+            },
+            {
+                text = "Keep listening.",
+                screen_id = "crystals_loop",
+                side_effects = {generate_crystals_loop, increment_self_doubt},
+            },
+            {
+                text = "Ignore it and keep moving.",
+                screen_id = "crossroads",
+                side_effects = {decrement_self_doubt},
+            },
+        },
+    }
+    screens["crystals_silence"] = {
+        image = crystals_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "\"Did someone follow me in here? Show yourself!\"",
+                screen_id = "crossroads",
+                side_effects = {increment_self_doubt},
+            },
+            {
+                text = "Get moving.",
+                screen_id = "crossroads",
+            },
+        },
+    }
+    screens["crossroads"] = {
+        image = crossroads_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "Take the high path.",
+                screen_id = "high_path",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "Take the low path.",
+                screen_id = "low_path",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "Think about which path to take.",
+                screen_id = "crossroads_loop",
+                side_effects = {generate_crossroads_loop, increment_self_doubt},
+            },
+        },
+    }
+    screens["crossroads_loop"] = {
+        image = crossroads_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "Take the high path.",
+                screen_id = "high_path",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "Take the low path.",
+                screen_id = "low_path",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "Think about which path to take.",
+                screen_id = "crossroads_loop",
+                side_effects = {generate_crossroads_loop, increment_self_doubt},
+            },
+        },
+    }
+    // TODO
+    screens["high_path"] = {
+
+    }
+    // TODO
+    screens["low_path"] = {
+
+    }
+    // TODO
+    screens["owl"] = {
+
+    }
+    // TODO
+    screens["owl_loop"] = {
+
+    }
+    // TODO
+    screens["good_ending"] = {
+
+    }
+    // TODO
+    screens["ambivalent_ending"] = {
+
+    }
+    // TODO
+    screens["fall_down_ending"] = {
+
+    }
+    // TODO
+    screens["skinwalker_ending"] = {
+
+    }
 
     current_screen := screens["example_screen"]
 
@@ -160,11 +299,80 @@ main :: proc() {
         for choice, index in current_screen.choices {
             rl.DrawTextEx(font, choice.text, {0, f32(TEXT_SIZE * index + TEXT_SIZE)}, 20, 0, CHOICE_TEXT_COLOR)
         }
-
-        current_screen.choices[0].side_effects["example_side_effect"]()
     }
 }
 
-example_side_effect :: proc() {
-    fmt.println("Example side effect completed")
+run_side_effects :: proc(choice: choice) {
+    for side_effect in choice.side_effects {
+        side_effect()
+    }
+}
+
+increment_self_doubt :: proc() {
+    self_doubt += 1
+}
+
+decrement_self_doubt :: proc() {
+    self_doubt -= 1
+}
+
+generate_crystals_loop :: proc() {
+    // To avoid another global, load again here. TODO: Do it up better after jam.
+    crystals_image := rl.LoadTexture("images/crystals.png")
+
+    screens["crystals_loop"] = {
+        image = crystals_image,
+        // TODO
+        text = fmt.caprintf(""),
+        choices = {
+            {
+                text = "\"Hello?\"",
+                screen_id = "crystals_loop",
+                side_effects = {generate_crystals_loop, increment_self_doubt},
+            },
+            {
+                text = "Keep listening.",
+                screen_id = "crystals_loop",
+                side_effects = {generate_crystals_loop, increment_self_doubt},
+            },
+            {
+                text = "Ignore it and keep moving.",
+                screen_id = "crossroads",
+                side_effects = {decrement_self_doubt},
+            },
+        },
+    }
+}
+
+generate_crossroads_loop :: proc() {
+    // To avoid another global, load again here. TODO: Do it up better after jam.
+    crossroads_image := rl.LoadTexture("images/crossroads.png")
+
+    screens["crossroads_loop"] = {
+        image = crossroads_image,
+        // TODO
+        text = fmt.caprintf(""),
+        choices = {
+            {
+                text = "Take the high path.",
+                screen_id = "high_path",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "Take the low path.",
+                screen_id = "low_path",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "Think about which path to take.",
+                screen_id = "crossroads_loop",
+                side_effects = {generate_crossroads_loop, increment_self_doubt},
+            },
+        },
+    }
+}
+
+// TODO
+generate_owl_loop :: proc() {
+
 }
