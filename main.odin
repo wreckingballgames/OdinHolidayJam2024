@@ -9,6 +9,8 @@ WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
 WINDOW_TITLE :: "Wonderlust"
 
+TEXT_SIZE :: 20
+
 IMAGE_X :: 140
 IMAGE_Y :: 0
 
@@ -63,6 +65,8 @@ main :: proc() {
 
     rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     defer rl.CloseWindow()
+
+    font := rl.LoadFont("PixAntiqua.ttf")
 
     // TODO: Replace placeholder (loaded on a screen by screen basis)
     current_image := rl.LoadTexture("image_placeholder.png")
@@ -143,9 +147,9 @@ main :: proc() {
         rl.DrawRectangleRounded(choice_rect3, .45, 32, CHOICE_BACKGROUND_COLOR)
         // TODO: Draw choice text
 
-        rl.DrawText(current_screen.text, 0, 0, 10, rl.WHITE)
+        rl.DrawTextEx(font, current_screen.text, {0, 0}, TEXT_SIZE, 0, TEXT_BOX_TEXT_COLOR)
         for choice, index in current_screen.choices {
-            rl.DrawText(choice.text, 0, 10 * i32(index) + 10, 10, rl.WHITE)
+            rl.DrawTextEx(font, choice.text, {0, f32(TEXT_SIZE * index + TEXT_SIZE)}, 20, 0, CHOICE_TEXT_COLOR)
         }
 
         current_screen.choices[0].side_effects["example_side_effect"]()
