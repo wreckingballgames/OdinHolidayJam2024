@@ -1,6 +1,7 @@
 package main
 
 import "core:fmt"
+import "core:mem"
 import rl "vendor:raylib"
 
 TARGET_FPS :: 60
@@ -21,6 +22,20 @@ screen :: struct {
 }
 
 main :: proc() {
+    track: mem.Tracking_Allocator
+    mem.tracking_allocator_init(&track, context.allocator)
+    context.allocator = mem.tracking_allocator(&track)
+
+    defer {
+        for _, entry in track.allocation_map {
+            fmt.eprintf("%v leaked %v bytes.\n", entry.location, entry.size)
+        }
+        for entry in track.bad_free_array {
+            fmt.eprintf("%v bad free.\n", entry.location)
+        }
+        mem.tracking_allocator_destroy(&track)
+    }
+
     rl.SetConfigFlags({.VSYNC_HINT})
     rl.SetTargetFPS(TARGET_FPS)
 
@@ -32,12 +47,14 @@ main :: proc() {
         "example_screen",
         map[cstring]proc() {"example_side_effect" = example_side_effect},
     }
+    defer delete(example_choice.side_effects)
 
     example_choice2 := choice {
         "Example choice 2",
         "example_screen",
         map[cstring]proc() {"example_side_effect" = example_side_effect},
     }
+    defer delete(example_choice2.side_effects)
 
     example_screen := screen {
         text = "Example screen",
