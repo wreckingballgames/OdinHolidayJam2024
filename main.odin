@@ -68,12 +68,18 @@ main :: proc() {
 
     font := rl.LoadFont("PixAntiqua.ttf")
 
-    // TODO: Replace placeholder (loaded on a screen by screen basis)
-    current_image := rl.LoadTexture("image_placeholder.png")
+    left_banner_image := rl.LoadTexture("images/left_banner.png")
+    right_banner_image := rl.LoadTexture("images/right_banner.png")
 
-    // TODO: Replace placeholders
-    left_banner := rl.LoadTexture("banner_placeholder.png")
-    right_banner := rl.LoadTexture("banner_placeholder.png")
+    cave_entrance_image := rl.LoadTexture("images/cave_entrance.png")
+    cave_exit_image := rl.LoadTexture("images/cave_exit.png")
+    crystals_image := rl.LoadTexture("images/crystals.png")
+    high_path_image := rl.LoadTexture("images/high_path.png")
+    low_path_image := rl.LoadTexture("images/low_path.png")
+    owl_image := rl.LoadTexture("images/owl.png")
+    skinwalker_image := rl.LoadTexture("images/skinwalker.png")
+
+    current_image: rl.Texture2D
 
     text_area_rect := rl.Rectangle {0, 420, 1280, 300,}
     text_box_rect := rl.Rectangle {32, 430, 1216, 150,}
@@ -115,6 +121,7 @@ main :: proc() {
     defer delete(example_choice2.side_effects)
 
     example_screen := screen {
+        image = cave_entrance_image,
         text = "Example screen",
         choices = []choice {example_choice, example_choice2}
     }
@@ -133,9 +140,11 @@ main :: proc() {
 
         rl.ClearBackground(rl.GRAY)
 
+        current_image = current_screen.image
+
         rl.DrawTexture(current_image, IMAGE_X, IMAGE_Y, rl.WHITE)
-        rl.DrawTexture(left_banner, LEFT_BANNER_X, BANNER_Y, rl.WHITE)
-        rl.DrawTexture(right_banner, RIGHT_BANNER_X, BANNER_Y, rl.WHITE)
+        rl.DrawTexture(left_banner_image, LEFT_BANNER_X, BANNER_Y, rl.WHITE)
+        rl.DrawTexture(right_banner_image, RIGHT_BANNER_X, BANNER_Y, rl.WHITE)
 
         rl.DrawRectangleRec(text_area_rect, TEXT_AREA_COLOR)
         rl.DrawRectangleRounded(text_box_rect, .45, 32, TEXT_BOX_BACKGROUND_COLOR)
