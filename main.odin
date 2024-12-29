@@ -47,6 +47,12 @@ choice :: struct {
     side_effects: []proc(),
 }
 
+restart_choice := choice {
+    text = "Restart.",
+    screen_id = "intro",
+    side_effects = {reset_self_doubt},
+}
+
 screen :: struct {
     image: rl.Texture2D,
     text: cstring,
@@ -167,11 +173,7 @@ main :: proc() {
         image = cave_entrance_image,
         text = "It was probably for the best. Who could tell?",
         choices = {
-            {
-                text = "Restart.",
-                screen_id = "intro",
-                side_effects = {reset_self_doubt},
-            },
+            restart_choice,
         },
     }
     screens["crystals"] = {
@@ -375,30 +377,18 @@ main :: proc() {
             },
         },
     }
-    // TODO
-    screens["ending"] = {
-
-    }
     screens["fall_down_ending"] = {
         image = low_path_image,
         text = "The boy squinted his eyes like he was trying to light a fire with his dusty ‘lids. He leaned further and further…and further. Finally, he leaned too far and lost his footing. He plunged into that yawning abyss and was never seen or heard from again. All that glitters is not gold.",
         choices = {
-            {
-                text = "Restart.",
-                screen_id = "intro",
-                side_effects = {reset_self_doubt},
-            },
+            restart_choice,
         },
     }
     screens["skinwalker_ending"] = {
         image = skinwalker_image,
         text = "The boy hitched up his britches and marched back up the tunnel, double-time. He had suspected for some days that he was being followed and now he intended to interrogate his stalker. He bumped into something and realized the space in front of him was a richer black than the space his eyes had become accustomed to. Grasping around in front of him, he grabbed handfuls of thick strands like a rabbit skin cap he owned as a small child. He looked up and saw a cracked, yellowish coyote skull with two black chasms peering down in his direction and was never seen or heard from again. Beware things that go bump in the night.",
         choices = {
-            {
-                text = "Restart.",
-                screen_id = "intro",
-                side_effects = {reset_self_doubt},
-            },
+            restart_choice,
         },
     }
 
@@ -491,9 +481,30 @@ decrement_self_doubt :: proc() {
     self_doubt -= 1
 }
 
-// TODO
 generate_intro_loop :: proc() {
+    // To avoid another global, load again here. TODO: Do it up better after jam.
+    cave_entrance_image := rl.LoadTexture("images/cave_entrance.png")
 
+    screens["intro"] = {
+        image = cave_entrance_image,
+        // TODO
+        text = fmt.caprintf(""),
+        choices = {
+            {
+                text = "Plunge in.",
+                screen_id = "crystals",
+            },
+            {
+                text = "Think about whether going into the cave is a good idea.",
+                screen_id = "intro_loop",
+                side_effects = {increment_self_doubt},
+            },
+            {
+                text = "Turn back.",
+                screen_id = "early_ending",
+            },
+        },
+    }
 }
 
 generate_crystals_loop :: proc() {
@@ -552,14 +563,46 @@ generate_crossroads_loop :: proc() {
     }
 }
 
-// TODO
 generate_owl_loop :: proc() {
+    // To avoid another global, load again here. TODO: Do it up better after jam.
+    owl_image := rl.LoadTexture("images/owl.png")
 
+    screens["crossroads_loop"] = {
+        image = owl_image,
+        // TODO
+        text = fmt.caprintf(""),
+        choices = {
+            {
+                text = "Examine the owl.",
+                screen_id = "owl_loop",
+                side_effects = {generate_owl_loop},
+            },
+            {
+                text = "\"Who, owl?\"",
+                screen_id = "owl_loop",
+                side_effects = {generate_owl_loop},
+            },
+            {
+                text = "Ignore the owl and move on.",
+                screen_id = "ending",
+                side_effects = {generate_ending},
+            },
+        },
+    }
 }
 
-// TODO
 generate_ending :: proc() {
+    cave_exit_image := rl.LoadTexture("images/cave_exit.png")
 
+    screens["ending"] = {
+        image = cave_exit_image,
+        // TODO
+        text = fmt.caprintf(""),
+        // TODO
+        choices = {
+            restart_choice,
+        },
+    }
 }
 
 reset_self_doubt :: proc() {
