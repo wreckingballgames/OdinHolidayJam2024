@@ -135,6 +135,26 @@ main :: proc() {
             },
             {
                 text = "Think about whether going into the cave is a good idea.",
+                screen_id = "intro_loop",
+                side_effects = {increment_self_doubt},
+            },
+            {
+                text = "Turn back.",
+                screen_id = "early_ending",
+            },
+        },
+    }
+    screens["intro_loop"] = {
+        image = cave_entrance_image,
+        text = "Maybe it wasn't such a hot idea. That forest was something else, but at least the boy knew the long and short of it. There could be anything in that cave. There could be nothing. Then again, maybe everything would be okay if he went underground.",
+        choices = {
+            {
+                text = "Keep thinking about it.",
+                screen_id = "intro_loop",
+                side_effects = {increment_self_doubt, generate_intro_loop},
+            },
+            {
+                text = "Go in.",
                 screen_id = "crystals",
             },
             {
@@ -145,13 +165,11 @@ main :: proc() {
     }
     screens["crystals"] = {
         image = crystals_image,
-        // TODO
-        text = "",
+        text = "The young man squeezed through the low mouth of the cave. He had to stoop for a few moments of shuffling in the dark before the mouth let out into a dimly illuminated tunnel. He could stand here. The source of light was plain to see; a massive growth of shimmering, golden crystals sticking out of the tunnel wall. The young man started to move on, but stopped when he thought he heard something. It sounded like running water rushing away somewhere. There was a monotonous dripping sound, too. Actually, the young man thought it sounded like whispering.",
         choices = {
             {
                 text = "Listen closely.",
                 screen_id = "crystals_loop",
-                side_effects = {generate_crystals_loop},
             },
             {
                 text = "\"Hello?\"",
@@ -166,8 +184,7 @@ main :: proc() {
     }
     screens["crystals_loop"] = {
         image = crystals_image,
-        // TODO
-        text = "",
+        text = "The boy held his breath and inclined his head toward the wall. The drip-dropping (whispering?) seemed to recede. Then he heard it again, more clearly. He thought he could make out a few words. Something like \"drip drip drip pssh woods drip tonight psssh\".",
         choices = {
             {
                 text = "\"Hello?\"",
@@ -188,13 +205,12 @@ main :: proc() {
     }
     screens["crystals_silence"] = {
         image = crystals_image,
-        // TODO
-        text = "",
+        text = "The whispering or dripping or whatever it was stopped immediately (the boy thought he could still hear it for a second, but definitely not.) The sound of rushing water was still proceeding steadily, presumably somewhere far away. Or was that just the sound of the inside of the boy's ears?",
         choices = {
             {
                 text = "\"Did someone follow me in here? Show yourself!\"",
-                screen_id = "crossroads",
-                side_effects = {increment_self_doubt},
+                screen_id = "crystals_loop",
+                side_effects = {generate_crystals_loop, increment_self_doubt},
             },
             {
                 text = "Get moving.",
@@ -220,7 +236,7 @@ main :: proc() {
             {
                 text = "Think about which path to take.",
                 screen_id = "crossroads_loop",
-                side_effects = {generate_crossroads_loop, increment_self_doubt},
+                side_effects = {increment_self_doubt},
             },
         },
     }
@@ -246,28 +262,135 @@ main :: proc() {
             },
         },
     }
-    // TODO
     screens["high_path"] = {
-
+        image = high_path_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "Shut your eyes and sidle along.",
+                screen_id = "owl",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "Look down.",
+                screen_id = "look_down",
+                side_effects = {increment_self_doubt},
+            },
+        },
     }
-    // TODO
+    screens["look_down"] = {
+        image = high_path_image,
+        text = "",
+        choices = {
+            {
+                text = "Squint your eyes and lean in to get a better look.",
+                screen_id = "fall_down_ending",
+            },
+            {
+                text = "Breathe slowly until you regain your nerve.",
+                screen_id = "owl",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "Shut your eyes and look away.",
+                screen_id = "owl",
+            },
+        },
+    }
     screens["low_path"] = {
-
+        image = low_path_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "Stop and listen closely.",
+                screen_id = "who_goes_there",
+            },
+            {
+                text = "Keep walking.",
+                screen_id = "owl",
+                side_effects = {decrement_self_doubt},
+            },
+        },
     }
-    // TODO
+    screens["who_goes_there"] = {
+        image = low_path_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "Hurry along.",
+                screen_id = "owl",
+                side_effects = {decrement_self_doubt},
+            },
+            {
+                text = "\"I can hear you coming.\"",
+                screen_id = "ambush",
+                side_effects = {increment_self_doubt},
+            },
+            {
+                text = "Crouch against the wall and wait.",
+                screen_id = "ambush",
+            },
+        },
+    }
+    screens["ambush"] = {
+        image = low_path_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "Keep waiting.",
+                screen_id = "skinwalker_ending",
+            },
+            {
+                text = "Change your mind and move ahead.",
+                screen_id = "owl",
+            },
+        },
+    }
     screens["owl"] = {
-
+        image = owl_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "Examine the owl.",
+                screen_id = "owl_loop",
+                side_effects = {generate_owl_loop},
+            },
+            {
+                text = "\"Who, owl?\"",
+                screen_id = "owl_loop",
+                side_effects = {generate_owl_loop},
+            },
+            {
+                text = "Ignore the owl and move on.",
+                screen_id = "ending",
+                side_effects = {generate_ending},
+            },
+        },
     }
-    // TODO
     screens["owl_loop"] = {
-
+        image = owl_image,
+        // TODO
+        text = "",
+        choices = {
+            {
+                text = "\"Who?\"",
+                screen_id = "owl_loop",
+                side_effects = {increment_self_doubt, generate_owl_loop},
+            },
+            {
+                text = "Smirk and move on.",
+                screen_id = "ending",
+                side_effects = {generate_ending},
+            },
+        },
     }
     // TODO
-    screens["good_ending"] = {
-
-    }
-    // TODO
-    screens["ambivalent_ending"] = {
+    screens["ending"] = {
 
     }
     // TODO
@@ -368,6 +491,11 @@ decrement_self_doubt :: proc() {
     self_doubt -= 1
 }
 
+// TODO
+generate_intro_loop :: proc() {
+
+}
+
 generate_crystals_loop :: proc() {
     // To avoid another global, load again here. TODO: Do it up better after jam.
     crystals_image := rl.LoadTexture("images/crystals.png")
@@ -426,6 +554,11 @@ generate_crossroads_loop :: proc() {
 
 // TODO
 generate_owl_loop :: proc() {
+
+}
+
+// TODO
+generate_ending :: proc() {
 
 }
 
