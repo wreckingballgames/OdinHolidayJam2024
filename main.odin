@@ -3,6 +3,7 @@ package main
 import "core:fmt"
 import "core:mem"
 import "core:math/rand"
+import "core:slice"
 import rl "vendor:raylib"
 
 TARGET_FPS :: 60
@@ -99,8 +100,6 @@ main :: proc() {
     owl_image := rl.LoadTexture("images/owl.png")
     skinwalker_image := rl.LoadTexture("images/skinwalker.png")
 
-    current_image: rl.Texture2D
-
     text_area_rect := rl.Rectangle {0, 420, 1280, 300,}
     text_box_rect := rl.Rectangle {32, 430, 1216, 150,}
     choice_box_rect := rl.Rectangle {32, 585, 1216, 130,}
@@ -140,30 +139,6 @@ main :: proc() {
                 screen_id = "crystals",
             },
             {
-                text = "Think about whether going into the cave is a good idea.",
-                screen_id = "intro_loop",
-                side_effects = {increment_self_doubt},
-            },
-            {
-                text = "Turn back.",
-                screen_id = "early_ending",
-            },
-        },
-    }
-    screens["intro_loop"] = {
-        image = cave_entrance_image,
-        text = "Maybe it wasn't such a hot idea. That forest was something else, but at least the boy knew the long and short of it. There could be anything in that cave. There could be nothing. Then again, maybe everything would be okay if he went underground.",
-        choices = {
-            {
-                text = "Keep thinking about it.",
-                screen_id = "intro_loop",
-                side_effects = {increment_self_doubt, generate_intro_loop},
-            },
-            {
-                text = "Go in.",
-                screen_id = "crystals",
-            },
-            {
                 text = "Turn back.",
                 screen_id = "early_ending",
             },
@@ -182,7 +157,7 @@ main :: proc() {
         choices = {
             {
                 text = "Listen closely.",
-                screen_id = "crystals_loop",
+                screen_id = "crystals_silence",
             },
             {
                 text = "\"Hello?\"",
@@ -195,36 +170,10 @@ main :: proc() {
             },
         },
     }
-    screens["crystals_loop"] = {
-        image = crystals_image,
-        text = "The boy held his breath and inclined his head toward the wall. The drip-dropping (whispering?) seemed to recede. Then he heard it again, more clearly. He thought he could make out a few words. Something like \"drip drip drip pssh woods drip tonight psssh\".",
-        choices = {
-            {
-                text = "\"Hello?\"",
-                screen_id = "crystals_loop",
-                side_effects = {generate_crystals_loop, increment_self_doubt},
-            },
-            {
-                text = "Keep listening.",
-                screen_id = "crystals_loop",
-                side_effects = {generate_crystals_loop, increment_self_doubt},
-            },
-            {
-                text = "Ignore it and keep moving.",
-                screen_id = "crossroads",
-                side_effects = {decrement_self_doubt},
-            },
-        },
-    }
     screens["crystals_silence"] = {
         image = crystals_image,
         text = "The whispering or dripping or whatever it was stopped immediately (the boy thought he could still hear it for a second, but definitely not.) The sound of rushing water was still proceeding steadily, presumably somewhere far away. Or was that just the sound of the inside of the boy's ears?",
         choices = {
-            {
-                text = "\"Did someone follow me in here? Show yourself!\"",
-                screen_id = "crystals_loop",
-                side_effects = {generate_crystals_loop, increment_self_doubt},
-            },
             {
                 text = "Get moving.",
                 screen_id = "crossroads",
@@ -244,32 +193,6 @@ main :: proc() {
                 text = "Take the low path.",
                 screen_id = "low_path",
                 side_effects = {decrement_self_doubt},
-            },
-            {
-                text = "Think about which path to take.",
-                screen_id = "crossroads_loop",
-                side_effects = {increment_self_doubt},
-            },
-        },
-    }
-    screens["crossroads_loop"] = {
-        image = crossroads_image,
-        text = "It was a tough choice. The boy figured going higher probably meant heading toward the overground. Then again, going lower might mean he would be aided by gravity. He thought his father had said something like that once. Did he laugh when he said that?",
-        choices = {
-            {
-                text = "Take the high path.",
-                screen_id = "high_path",
-                side_effects = {decrement_self_doubt},
-            },
-            {
-                text = "Take the low path.",
-                screen_id = "low_path",
-                side_effects = {decrement_self_doubt},
-            },
-            {
-                text = "Think about which path to take.",
-                screen_id = "crossroads_loop",
-                side_effects = {generate_crossroads_loop, increment_self_doubt},
             },
         },
     }
@@ -344,11 +267,11 @@ main :: proc() {
         choices = {
             {
                 text = "Examine the owl.",
-                screen_id = "owl_loop",
+                screen_id = "owl_closer_look",
             },
             {
                 text = "\"Who, owl?\"",
-                screen_id = "owl_loop",
+                screen_id = "owl_closer_look",
             },
             {
                 text = "Ignore the owl and move on.",
@@ -357,17 +280,12 @@ main :: proc() {
             },
         },
     }
-    screens["owl_loop"] = {
+    screens["owl_closer_look"] = {
         image = owl_image,
-        text = "The owl hooted.",
+        text = "The owl hoots and ruffles its feathers.",
         choices = {
             {
-                text = "\"Who?\"",
-                screen_id = "owl_loop",
-                side_effects = {increment_self_doubt},
-            },
-            {
-                text = "Smirk and move on.",
+                text = "Move on.",
                 screen_id = "ending",
                 side_effects = {generate_ending},
             },
@@ -408,11 +326,14 @@ main :: proc() {
         }
 
         if rl.IsMouseButtonReleased(.LEFT) {
-            if choice1_selected {
+            if choice1_selected && len(current_screen.choices) > 0 {
+                run_side_effects(current_screen.choices[0])
                 current_screen = screens[current_screen.choices[0].screen_id]
             } else if choice2_selected && len(current_screen.choices) >= 2 {
+                run_side_effects(current_screen.choices[1])
                 current_screen = screens[current_screen.choices[1].screen_id]
             } else if choice3_selected && len(current_screen.choices) == 3 {
+                run_side_effects(current_screen.choices[2])
                 current_screen = screens[current_screen.choices[2].screen_id]
             }
         }
@@ -422,9 +343,7 @@ main :: proc() {
 
         rl.ClearBackground(rl.GRAY)
 
-        current_image = current_screen.image
-
-        rl.DrawTexture(current_image, IMAGE_X, IMAGE_Y, rl.WHITE)
+        rl.DrawTexture(current_screen.image, IMAGE_X, IMAGE_Y, rl.WHITE)
         rl.DrawTexture(left_banner_image, LEFT_BANNER_X, BANNER_Y, rl.WHITE)
         rl.DrawTexture(right_banner_image, RIGHT_BANNER_X, BANNER_Y, rl.WHITE)
 
@@ -435,29 +354,31 @@ main :: proc() {
 
         rl.DrawRectangleRec(choice_box_rect, CHOICE_BOX_COLOR)
 
-        if choice1_selected {
-            rl.DrawRectangleRec(choice_rect1, SELECTED_CHOICE_BACKGROUND_COLOR)
-            draw_text_boxed(font, current_screen.choices[0].text, choice_rect1, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
-        } else {
-            rl.DrawRectangleRec(choice_rect1, CHOICE_BACKGROUND_COLOR)
-            draw_text_boxed(font, current_screen.choices[0].text, choice_rect1, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+        if len(current_screen.choices) > 0 {
+            if choice1_selected {
+                rl.DrawRectangleRec(choice_rect1, SELECTED_CHOICE_BACKGROUND_COLOR)
+                rl.DrawTextEx(font, current_screen.choices[0].text, {choice_rect1.x, choice_rect1.y}, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
+            } else {
+                rl.DrawRectangleRec(choice_rect1, CHOICE_BACKGROUND_COLOR)
+                rl.DrawTextEx(font, current_screen.choices[0].text, {choice_rect1.x, choice_rect1.y}, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+            }
         }
         if len(current_screen.choices) >= 2 {
             if choice2_selected {
                 rl.DrawRectangleRec(choice_rect2, SELECTED_CHOICE_BACKGROUND_COLOR)
-                draw_text_boxed(font, current_screen.choices[1].text, choice_rect2, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
+                rl.DrawTextEx(font, current_screen.choices[1].text, {choice_rect2.x, choice_rect2.y}, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
             } else {
                 rl.DrawRectangleRec(choice_rect2, CHOICE_BACKGROUND_COLOR)
-                draw_text_boxed(font, current_screen.choices[1].text, choice_rect2, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+                rl.DrawTextEx(font, current_screen.choices[1].text, {choice_rect2.x, choice_rect2.y}, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
             }
         }
         if len(current_screen.choices) == 3 {
             if choice3_selected {
                 rl.DrawRectangleRec(choice_rect3, SELECTED_CHOICE_BACKGROUND_COLOR)
-                draw_text_boxed(font, current_screen.choices[2].text, choice_rect3, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
+                rl.DrawTextEx(font, current_screen.choices[2].text, {choice_rect3.x, choice_rect3.y}, TEXT_SIZE, 0, SELECTED_CHOICE_TEXT_COLOR)
             } else {
                 rl.DrawRectangleRec(choice_rect3, CHOICE_BACKGROUND_COLOR)
-                draw_text_boxed(font, current_screen.choices[2].text, choice_rect3, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
+                rl.DrawTextEx(font, current_screen.choices[2].text, {choice_rect3.x, choice_rect3.y}, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
             }
         }
     }
@@ -475,88 +396,6 @@ increment_self_doubt :: proc() {
 
 decrement_self_doubt :: proc() {
     self_doubt -= 1
-}
-
-generate_intro_loop :: proc() {
-    // To avoid another global, load again here. TODO: Do it up better after jam.
-    cave_entrance_image := rl.LoadTexture("images/cave_entrance.png")
-
-    screens["intro"] = {
-        image = cave_entrance_image,
-        // TODO
-        text = fmt.caprintf(""),
-        choices = {
-            {
-                text = "Plunge in.",
-                screen_id = "crystals",
-            },
-            {
-                text = "Think about whether going into the cave is a good idea.",
-                screen_id = "intro_loop",
-                side_effects = {increment_self_doubt},
-            },
-            {
-                text = "Turn back.",
-                screen_id = "early_ending",
-            },
-        },
-    }
-}
-
-generate_crystals_loop :: proc() {
-    // To avoid another global, load again here. TODO: Do it up better after jam.
-    crystals_image := rl.LoadTexture("images/crystals.png")
-
-    screens["crystals_loop"] = {
-        image = crystals_image,
-        // TODO
-        text = fmt.caprintf(""),
-        choices = {
-            {
-                text = "\"Hello?\"",
-                screen_id = "crystals_loop",
-                side_effects = {generate_crystals_loop, increment_self_doubt},
-            },
-            {
-                text = "Keep listening.",
-                screen_id = "crystals_loop",
-                side_effects = {generate_crystals_loop, increment_self_doubt},
-            },
-            {
-                text = "Ignore it and keep moving.",
-                screen_id = "crossroads",
-                side_effects = {decrement_self_doubt},
-            },
-        },
-    }
-}
-
-generate_crossroads_loop :: proc() {
-    // To avoid another global, load again here. TODO: Do it up better after jam.
-    crossroads_image := rl.LoadTexture("images/crossroads.png")
-
-    screens["crossroads_loop"] = {
-        image = crossroads_image,
-        // TODO
-        text = fmt.caprintf(""),
-        choices = {
-            {
-                text = "Take the high path.",
-                screen_id = "high_path",
-                side_effects = {decrement_self_doubt},
-            },
-            {
-                text = "Take the low path.",
-                screen_id = "low_path",
-                side_effects = {decrement_self_doubt},
-            },
-            {
-                text = "Think about which path to take.",
-                screen_id = "crossroads_loop",
-                side_effects = {generate_crossroads_loop, increment_self_doubt},
-            },
-        },
-    }
 }
 
 generate_ending :: proc() {
