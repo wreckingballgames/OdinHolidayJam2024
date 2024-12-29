@@ -163,6 +163,17 @@ main :: proc() {
             },
         },
     }
+    screens["early_ending"] = {
+        image = cave_entrance_image,
+        text = "It was probably for the best. Who could tell?",
+        choices = {
+            {
+                text = "Restart.",
+                screen_id = "intro",
+                side_effects = {reset_self_doubt},
+            },
+        },
+    }
     screens["crystals"] = {
         image = crystals_image,
         text = "The young man squeezed through the low mouth of the cave. He had to stoop for a few moments of shuffling in the dark before the mouth let out into a dimly illuminated tunnel. He could stand here. The source of light was plain to see; a massive growth of shimmering, golden crystals sticking out of the tunnel wall. The young man started to move on, but stopped when he thought he heard something. It sounded like running water rushing away somewhere. There was a monotonous dripping sound, too. Actually, the young man thought it sounded like whispering.",
@@ -393,13 +404,27 @@ main :: proc() {
     screens["ending"] = {
 
     }
-    // TODO
     screens["fall_down_ending"] = {
-
+        image = low_path_image,
+        text = "The boy squinted his eyes like he was trying to light a fire with his dusty ‘lids. He leaned further and further…and further. Finally, he leaned too far and lost his footing. He plunged into that yawning abyss and was never seen or heard from again. All that glitters is not gold.",
+        choices = {
+            {
+                text = "Restart.",
+                screen_id = "intro",
+                side_effects = {reset_self_doubt},
+            },
+        },
     }
-    // TODO
     screens["skinwalker_ending"] = {
-
+        image = skinwalker_image,
+        text = "The boy hitched up his britches and marched back up the tunnel, double-time. He had suspected for some days that he was being followed and now he intended to interrogate his stalker. He bumped into something and realized the space in front of him was a richer black than the space his eyes had become accustomed to. Grasping around in front of him, he grabbed handfuls of thick strands like a rabbit skin cap he owned as a small child. He looked up and saw a cracked, yellowish coyote skull with two black chasms peering down in his direction and was never seen or heard from again. Beware things that go bump in the night.",
+        choices = {
+            {
+                text = "Restart.",
+                screen_id = "intro",
+                side_effects = {reset_self_doubt},
+            },
+        },
     }
 
     current_screen := screens["intro"]
@@ -560,6 +585,10 @@ generate_owl_loop :: proc() {
 // TODO
 generate_ending :: proc() {
 
+}
+
+reset_self_doubt :: proc() {
+    self_doubt = 0
 }
 
 // Adapted from an example by Vlad Adrian and Ramon Santamaria
