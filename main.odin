@@ -231,8 +231,7 @@ main :: proc() {
     }
     screens["crossroads"] = {
         image = crossroads_image,
-        // TODO
-        text = "",
+        text = "The tunnel let out two ways, separated by a craggy cavern wall; one went higher and the other went lower. The young man had to choose a path.",
         choices = {
             {
                 text = "Take the high path.",
@@ -253,8 +252,7 @@ main :: proc() {
     }
     screens["crossroads_loop"] = {
         image = crossroads_image,
-        // TODO
-        text = "",
+        text = "It was a tough choice. The boy figured going higher probably meant heading toward the overground. Then again, going lower might mean he would be aided by gravity. He thought his father had said something like that once. Did he laugh when he said that?",
         choices = {
             {
                 text = "Take the high path.",
@@ -275,8 +273,7 @@ main :: proc() {
     }
     screens["high_path"] = {
         image = high_path_image,
-        // TODO
-        text = "",
+        text = "The young man had to squeeze through a narrow part of the cave to come out onto an even narrower ledge. No longer afforded the crystal's dim glow, he had to let his eyes adjust to the darkness. Once, he nearly stepped off into nothing. When his eyes adjusted, he still couldn't see the bottom of the space he nearly walked off into.",
         choices = {
             {
                 text = "Shut your eyes and sidle along.",
@@ -292,7 +289,7 @@ main :: proc() {
     }
     screens["look_down"] = {
         image = high_path_image,
-        text = "",
+        text = "The boy felt a sudden rush of vertigo nearly caused him to keel over the edge then and there. He gripped the wall behind him as best he could, scrabbling to hold onto the crumbling, sheer stone. Somehow he didn't fall. His eyes were still peering into the chasm below (he could see now, clearly, that it was deep.) He thought he saw something shiny and golden down there. Some part of the boy's subconscious stirred at that sight. His hands were shaking and his breath was ragged, still enduring that lightheadedness brought on by nearly falling to one's death (or maybe he just imagined it and his footing had been just fine.)",
         choices = {
             {
                 text = "Squint your eyes and lean in to get a better look.",
@@ -311,8 +308,7 @@ main :: proc() {
     }
     screens["low_path"] = {
         image = low_path_image,
-        // TODO
-        text = "",
+        text = "The young man had an easy enough time proceeding down the low path. He just had to avoid stumbling on the little rocks and cracks in the ground, as well as his own feet. The path let out into a tunnel, wider than the one he had just left, but pitch black. He went on for a while and all the ambient sounds that could be distant echoes of the cavern's ecosystem faded out. It was completely still. The only sounds were his own footfalls. Every once in a while, he thought he heard a scraping sound some distance behind him, like someone was raking the cavern wall with a spade.",
         choices = {
             {
                 text = "Stop and listen closely.",
@@ -327,8 +323,7 @@ main :: proc() {
     }
     screens["who_goes_there"] = {
         image = low_path_image,
-        // TODO
-        text = "",
+        text = "After he heard the scraping sound one too many times for him to discount it completely, the boy stopped and snapped around a hundred and eighty degrees. He inclined his head in the direction he had come from and listened. Silence. He still couldn't see a thing and strongly wished that he could. After what seemed like an hour (was it really?) he heard the scraping sound again, closer and more regular and different some other way. It was like the same sound had echoed and laid over itself three or four times again.",
         choices = {
             {
                 text = "Hurry along.",
@@ -336,28 +331,8 @@ main :: proc() {
                 side_effects = {decrement_self_doubt},
             },
             {
-                text = "\"I can hear you coming.\"",
-                screen_id = "ambush",
-                side_effects = {increment_self_doubt},
-            },
-            {
-                text = "Crouch against the wall and wait.",
-                screen_id = "ambush",
-            },
-        },
-    }
-    screens["ambush"] = {
-        image = low_path_image,
-        // TODO
-        text = "",
-        choices = {
-            {
-                text = "Keep waiting.",
+                text = "Confront whoever's making the sound.",
                 screen_id = "skinwalker_ending",
-            },
-            {
-                text = "Change your mind and move ahead.",
-                screen_id = "owl",
             },
         },
     }
