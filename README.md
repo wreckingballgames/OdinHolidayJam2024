@@ -10,4 +10,4 @@ The theme is "overground and underground". I am using this theme.
 
 [Jam page](https://itch.io/jam/odin-holiday-jam)
 
-[Submission page](https://wreckingballgames.itch.io/wonderlust))
+[Submission page](https://wreckingballgames.itch.io/wonderlust)
