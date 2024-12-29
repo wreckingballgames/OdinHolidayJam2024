@@ -340,17 +340,15 @@ main :: proc() {
     }
     screens["owl"] = {
         image = owl_image,
-        text = "The path crested into a small chamber. The young man could see a little better here. At the far end of the chamber was a small rock with something moving sitting on top. His heart raced for a moment and then let up when he realized it was an owl. The animal's flashing gray eyes seemed to stare into the young man's and give him some comfort. To the owl's left, a light shone dimly from the entrance of another narrow path.",
+        text = "The path crested into a small chamber. The young man could see a little better there. At the far end of the chamber was a small rock with something moving sitting on top. His heart raced for a moment and then relented when he realized it was an owl. The animal's flashing gray eyes seemed to stare into the young man's and give him some comfort. To the owl's left, a light shone dimly from the entrance of another narrow path.",
         choices = {
             {
                 text = "Examine the owl.",
                 screen_id = "owl_loop",
-                side_effects = {generate_owl_loop},
             },
             {
                 text = "\"Who, owl?\"",
                 screen_id = "owl_loop",
-                side_effects = {generate_owl_loop},
             },
             {
                 text = "Ignore the owl and move on.",
@@ -361,13 +359,12 @@ main :: proc() {
     }
     screens["owl_loop"] = {
         image = owl_image,
-        // TODO
-        text = "",
+        text = "The owl hooted.",
         choices = {
             {
                 text = "\"Who?\"",
                 screen_id = "owl_loop",
-                side_effects = {increment_self_doubt, generate_owl_loop},
+                side_effects = {increment_self_doubt},
             },
             {
                 text = "Smirk and move on.",
@@ -557,34 +554,6 @@ generate_crossroads_loop :: proc() {
                 text = "Think about which path to take.",
                 screen_id = "crossroads_loop",
                 side_effects = {generate_crossroads_loop, increment_self_doubt},
-            },
-        },
-    }
-}
-
-generate_owl_loop :: proc() {
-    // To avoid another global, load again here. TODO: Do it up better after jam.
-    owl_image := rl.LoadTexture("images/owl.png")
-
-    screens["crossroads_loop"] = {
-        image = owl_image,
-        // TODO
-        text = fmt.caprintf(""),
-        choices = {
-            {
-                text = "Examine the owl.",
-                screen_id = "owl_loop",
-                side_effects = {generate_owl_loop},
-            },
-            {
-                text = "\"Who, owl?\"",
-                screen_id = "owl_loop",
-                side_effects = {generate_owl_loop},
-            },
-            {
-                text = "Ignore the owl and move on.",
-                screen_id = "ending",
-                side_effects = {generate_ending},
             },
         },
     }
