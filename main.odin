@@ -63,6 +63,7 @@ screen :: struct {
 screens: map[cstring]screen
 
 self_doubt: int
+AMBIVALENT_ENDING_SELF_DOUBT_THRESHOLD :: 5
 
 main :: proc() {
     // Tracking allocator code adapted from Karl Zylinski's tutorials.
@@ -305,6 +306,13 @@ main :: proc() {
             restart_choice,
         },
     }
+    screens["ending"] = {
+        image = cave_exit_image,
+        text = "placeholder",
+        choices = {
+            restart_choice,
+        },
+    }
 
     current_screen := screens["intro"]
 
@@ -401,14 +409,28 @@ decrement_self_doubt :: proc() {
 generate_ending :: proc() {
     cave_exit_image := rl.LoadTexture("images/cave_exit.png")
 
-    screens["ending"] = {
-        image = cave_exit_image,
-        // TODO
-        text = fmt.caprintf(""),
-        // TODO
-        choices = {
-            restart_choice,
-        },
+    screen, ok := &screens["ending"]
+
+    if ok {
+        if self_doubt >= AMBIVALENT_ENDING_SELF_DOUBT_THRESHOLD {
+            screen^ = {
+                image = cave_exit_image,
+                text = fmt.caprintf("The boy made it to the end of the cave, but his heart was no longer in it. He had had a hard time of it. Maybe it wasn't worth it to keep going on. Maybe they'd take him back if he turned around right now. But what if they were still feeling sore? He sat down to ponder it for a while."),
+                choices = slice.clone([]choice {
+                    restart_choice,
+                }),
+            }
+        } else {
+            screen^ = {
+                image = cave_exit_image,
+                text = fmt.caprintf("The young man made it to the end of the cave. He was only a little harrowed by what he'd seen and thought in that deep, dark recess. He rested his feet for a while. Daylight was running out. He stood up, stretched, and got back on the road."),
+                choices = slice.clone([]choice {
+                    restart_choice,
+                }),
+            }
+        }
+    } else {
+        fmt.println("it's fucked")
     }
 }
 
