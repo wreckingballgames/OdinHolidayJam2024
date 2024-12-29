@@ -87,6 +87,9 @@ main :: proc() {
     rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     defer rl.CloseWindow()
 
+    rl.InitAudioDevice()
+    defer rl.CloseAudioDevice()
+
     font := rl.LoadFont("PixAntiqua.ttf")
 
     left_banner_image := rl.LoadTexture("images/left_banner.png")
@@ -100,6 +103,10 @@ main :: proc() {
     low_path_image := rl.LoadTexture("images/low_path.png")
     owl_image := rl.LoadTexture("images/owl.png")
     skinwalker_image := rl.LoadTexture("images/skinwalker.png")
+
+    music := rl.LoadMusicStream("universfield_quiet_moments.mp3")
+    defer rl.UnloadMusicStream(music)
+    rl.PlayMusicStream(music)
 
     text_area_rect := rl.Rectangle {0, 420, 1280, 300,}
     text_box_rect := rl.Rectangle {32, 430, 1216, 150,}
@@ -319,6 +326,8 @@ main :: proc() {
     mouse_position: rl.Vector2
 
     for !rl.WindowShouldClose() {
+        rl.UpdateMusicStream(music);
+
         mouse_position = rl.GetMousePosition()
 
         choice1_selected: bool
@@ -389,6 +398,9 @@ main :: proc() {
                 rl.DrawTextEx(font, current_screen.choices[2].text, {choice_rect3.x, choice_rect3.y}, TEXT_SIZE, 0, CHOICE_TEXT_COLOR)
             }
         }
+
+        // Music credit https://freemusicarchive.org/music/universfield/ambient-music/quiet-moments/
+        rl.DrawTextEx(font, "Music is Quiet Moments by Universfield", {0, WINDOW_HEIGHT - 10}, 10, 0, rl.WHITE)
     }
 }
 
@@ -429,8 +441,6 @@ generate_ending :: proc() {
                 }),
             }
         }
-    } else {
-        fmt.println("it's fucked")
     }
 }
 
