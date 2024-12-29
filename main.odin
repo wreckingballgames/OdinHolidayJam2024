@@ -340,8 +340,7 @@ main :: proc() {
     }
     screens["owl"] = {
         image = owl_image,
-        // TODO
-        text = "",
+        text = "The path crested into a small chamber. The young man could see a little better here. At the far end of the chamber was a small rock with something moving sitting on top. His heart raced for a moment and then let up when he realized it was an owl. The animal's flashing gray eyes seemed to stare into the young man's and give him some comfort. To the owl's left, a light shone dimly from the entrance of another narrow path.",
         choices = {
             {
                 text = "Examine the owl.",
